@@ -14,6 +14,10 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
+// Routes
+const petRoutes = require('./Routes/pets');
+app.use('/api/pets', petRoutes);
+
 // Connect DB
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
