@@ -1,11 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Heart, Menu, X } from "lucide-react";
+import { Heart, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const location = useLocation();
+
+  // Check for user authentication on component mount
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
 
   const links = [
     { to: "/", label: "Home" },
@@ -16,6 +30,13 @@ const Navbar = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    // Optional: redirect to home page
+    // window.location.href = '/';
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
@@ -42,6 +63,30 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
+          <div className="ml-4 flex items-center gap-2">
+            {user ? (
+              // Show user info and logout when logged in
+              <>
+                <span className="text-sm text-muted-foreground">
+                  Welcome, {user.name}
+                </span>
+                <Button variant="ghost" size="sm" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              // Show login/signup when not logged in
+              <>
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/login">Login</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link to="/register">Sign Up</Link>
+                </Button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Mobile Toggle */}
@@ -70,6 +115,30 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
+          <div className="mt-4 flex flex-col gap-2">
+            {user ? (
+              // Show user info and logout when logged in
+              <>
+                <div className="px-3 py-2 text-sm text-muted-foreground">
+                  Welcome, {user.name}
+                </div>
+                <Button variant="ghost" size="sm" className="justify-start" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              // Show login/signup when not logged in
+              <>
+                <Button asChild variant="ghost" size="sm" className="justify-start">
+                  <Link to="/login" onClick={() => setMobileOpen(false)}>Login</Link>
+                </Button>
+                <Button asChild size="sm" className="justify-start">
+                  <Link to="/register" onClick={() => setMobileOpen(false)}>Sign Up</Link>
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </nav>

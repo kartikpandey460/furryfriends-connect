@@ -9,6 +9,8 @@ import SheltersPage from "./pages/Shelters";
 import AdoptionFormPage from "./pages/AdoptionForm";
 import AdoptionRequestsPage from "./pages/AdoptionRequests";
 import DonatePage from "./pages/Donate";
+import LoginPage from "./pages/Login";
+import RegisterPage from "./pages/Register";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/adopt/:dogId" element={<AdoptionFormPage />} />
           <Route path="/adoption-requests" element={<AdoptionRequestsPage />} />
           <Route path="/donate" element={<DonatePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

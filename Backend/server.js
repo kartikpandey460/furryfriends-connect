@@ -16,10 +16,12 @@ app.get("/", (req, res) => {
 
 // Routes
 const petRoutes = require('./Routes/pets');
+const authRoutes = require('./Routes/auth');
 app.use('/api/pets', petRoutes);
+app.use('/api/auth', authRoutes);
 
 // Connect DB
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://dhruvmendiratta:dhruvmendiratta123@furrysouls.cm5trza.mongodb.net/FurrySoulsdotcom')
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.log(err));
 
