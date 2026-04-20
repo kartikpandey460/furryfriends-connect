@@ -17,8 +17,14 @@ app.get("/", (req, res) => {
 // Routes
 const petRoutes = require('./Routes/pets');
 const authRoutes = require('./Routes/auth');
+const adoptionRoutes = require('./Routes/adoptions');
+const shelterRoutes = require('./Routes/shelters');
+const donationRoutes = require('./Routes/donations');
 app.use('/api/pets', petRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/adoptions', adoptionRoutes);
+app.use('/api/shelters', shelterRoutes);
+app.use('/api/donations', donationRoutes);
 
 // Connect DB
 mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://dhruvmendiratta:dhruvmendiratta123@furrysouls.cm5trza.mongodb.net/FurrySoulsdotcom')

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { shelters } from "@/data/dummyData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,8 +19,14 @@ interface Dog {
   neutered: boolean;
 }
 
-const DogCard = ({ dog }: { dog: Dog }) => {
+interface Shelter {
+  id: string;
+  name: string;
+}
+
+const DogCard = ({ dog, shelters }: { dog: Dog; shelters: Shelter[] }) => {
   const shelter = shelters.find((s) => s.id === dog.shelterId);
+
   return (
     <Card className="group overflow-hidden border shadow-card transition-all hover:shadow-elevated hover:-translate-y-1">
       <div className="relative aspect-square overflow-hidden">
@@ -70,11 +75,17 @@ const DogCard = ({ dog }: { dog: Dog }) => {
 
 const DogsListing = () => {
   const [dogs, setDogs] = useState<Dog[]>([]);
+  const [shelters, setShelters] = useState<Shelter[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/pets')
-      .then(res => res.json())
-      .then(setDogs)
+    Promise.all([
+      fetch('http://localhost:5000/api/pets').then((res) => res.json()),
+      fetch('http://localhost:5000/api/shelters').then((res) => res.json()),
+    ])
+      .then(([petsData, sheltersData]) => {
+        setDogs(petsData);
+        setShelters(sheltersData);
+      })
       .catch(console.error);
   }, []);
 
@@ -90,7 +101,7 @@ const DogsListing = () => {
       </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {dogs.map((dog) => (
-          <DogCard key={dog.id} dog={dog} />
+          <DogCard key={dog.id} dog={dog} shelters={shelters} />
         ))}
       </div>
     </section>

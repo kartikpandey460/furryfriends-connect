@@ -32,7 +32,9 @@ router.get('/:id', async (req, res) => {
     if (!pet) {
       return res.status(404).json({ message: 'Pet not found' });
     }
-    res.json(pet);
+    const petObject = pet.toObject();
+    petObject.id = pet._id.toString();
+    res.json(petObject);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

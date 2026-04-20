@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { dogs, shelters } from "@/data/dummyData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,25 +11,139 @@ import { ArrowLeft, PawPrint } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+interface Dog {
+  id: string;
+  name: string;
+  breed: string;
+  age: string;
+  gender: string;
+  size: string;
+  image: string;
+  description: string;
+  shelterId: string;
+  vaccinated: boolean;
+  neutered: boolean;
+}
+
+interface Shelter {
+  id: string;
+  name: string;
+  location: string;
+  address: string;
+}
+
 const AdoptionFormPage = () => {
   const { dogId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const dog = dogs.find((d) => d.id === dogId);
-  const shelter = dog ? shelters.find((s) => s.id === dog.shelterId) : null;
+  const [dog, setDog] = useState<Dog | null>(null);
+  const [shelter, setShelter] = useState<Shelter | null>(null);
+  const [dogLoading, setDogLoading] = useState(true);
+
+  useEffect(() => {
+    if (!dogId) {
+      setDog(null);
+      setDogLoading(false);
+      return;
+    }
+
+    setDogLoading(true);
+    fetch(`http://localhost:5000/api/pets/${dogId}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Dog not found");
+        }
+        return res.json();
+      })
+      .then((data: Dog) => setDog(data))
+      .catch(() => setDog(null))
+      .finally(() => setDogLoading(false));
+  }, [dogId]);
+
+  useEffect(() => {
+    if (!dog?.shelterId) {
+      setShelter(null);
+      return;
+    }
+
+    fetch(`http://localhost:5000/api/shelters/${dog.shelterId}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Shelter not found');
+        }
+        return res.json();
+      })
+      .then(setShelter)
+      .catch(() => setShelter(null));
+  }, [dog?.shelterId]);
 
   const [form, setForm] = useState({
     name: "", email: "", phone: "", address: "", occupation: "", experience: "", reason: "", housingType: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Application Submitted! 🎉",
-      description: `Your adoption request for ${dog?.name || "this dog"} has been sent to ${shelter?.name || "the shelter"}.`,
-    });
-    setTimeout(() => navigate("/adoption-requests"), 1500);
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/adoptions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          dogId: dog?.id ?? (dog as any)?._id,
+          dogName: dog?.name,
+          shelterId: dog?.shelterId,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          occupation: form.occupation,
+          experience: form.experience,
+          reason: form.reason,
+          housingType: form.housingType,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Application Submitted! 🎉",
+          description: `Your adoption request for ${dog?.name || "this dog"} has been sent to ${shelter?.name || "the shelter"}.`,
+        });
+        setTimeout(() => navigate("/adoption-requests"), 1500);
+      } else {
+        toast({
+          title: "Submission Failed",
+          description: data.message || "Unable to submit your application.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (dogLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container mx-auto flex flex-col items-center justify-center px-4 py-32 text-center">
+          <h2 className="font-display text-2xl font-bold text-foreground">Loading dog details...</h2>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!dog) {
     return (
@@ -108,7 +221,7 @@ const AdoptionFormPage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="housingType">Housing Type</Label>
-                  <Select onValueChange={(v) => setForm({ ...form, housingType: v })}>
+                  <Select value={form.housingType} onValueChange={(v) => setForm({ ...form, housingType: v })}>
                     <SelectTrigger><SelectValue placeholder="Select your housing type" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="apartment">Apartment</SelectItem>
@@ -126,9 +239,15 @@ const AdoptionFormPage = () => {
                   <Label htmlFor="reason">Why do you want to adopt {dog.name}?</Label>
                   <Textarea id="reason" required value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} placeholder="Share your reasons..." />
                 </div>
-                <Button type="submit" size="lg" className="w-full rounded-full text-base">
-                  <PawPrint className="mr-2 h-5 w-5" />
-                  Submit Adoption Request
+                <Button type="submit" size="lg" className="w-full rounded-full text-base" disabled={loading}>
+                  {loading ? (
+                    "Submitting..."
+                  ) : (
+                    <>
+                      <PawPrint className="mr-2 h-5 w-5" />
+                      Submit Adoption Request
+                    </>
+                  )}
                 </Button>
               </form>
             </CardContent>
