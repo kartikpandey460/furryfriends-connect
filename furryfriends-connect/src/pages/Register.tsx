@@ -6,12 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, PawPrint } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { setUser } = useAuth();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -51,6 +53,7 @@ const RegisterPage = () => {
 
       if (response.ok) {
         localStorage.setItem('user', JSON.stringify(data));
+        setUser(data);
         toast({
           title: "Registration Successful! 🎉",
           description: `Welcome to FurrySouls, ${data.name}!`,

@@ -1,33 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Heart, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const { user, setUser } = useAuth();
   const location = useLocation();
 
-  // Check for user authentication on component mount
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('user');
-      }
-    }
-  }, []);
-
-  const links = [
+  const baseLinks = [
     { to: "/", label: "Home" },
     { to: "/dogs", label: "Adopt a Dog" },
     { to: "/shelters", label: "Shelters" },
-    { to: "/adoption-requests", label: "Adoption Requests" },
     { to: "/donate", label: "Donate" },
   ];
+
+  const adminLinks = [
+    { to: "/admin", label: "Admin Dashboard" },
+    { to: "/adoption-requests", label: "Adoption Requests" },
+  ];
+
+  const links = user && user.role === 'admin' ? [...baseLinks, ...adminLinks] : baseLinks;
 
   const isActive = (path: string) => location.pathname === path;
 

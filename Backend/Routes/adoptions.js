@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const AdoptionRequest = require('../Models/AdoptionRequest');
+const { protect, admin } = require('../Middleware/authMiddleware');
 
-// Get all adoption requests
-router.get('/', async (req, res) => {
+// Get all adoption requests (Admin only)
+router.get('/', protect, admin, async (req, res) => {
   try {
     const requests = await AdoptionRequest.find().sort({ createdAt: -1 });
     res.json(requests);
@@ -63,8 +64,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update request status
-router.patch('/:id/status', async (req, res) => {
+// Update request status (Admin only)
+router.patch('/:id/status', protect, admin, async (req, res) => {
   try {
     const updatedRequest = await AdoptionRequest.findByIdAndUpdate(
       req.params.id,

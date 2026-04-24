@@ -1,7 +1,9 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const Pet = require('./Models/Pet');
 const Shelter = require('./Models/Shelter');
+const User = require('./Models/User');
 
 const pets = [
   { name: "Bruno", breed: "Indian Pariah", age: "2 years", gender: "Male", size: "Medium", image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400", description: "A friendly and energetic boy who loves morning walks and belly rubs.", shelterId: "1", vaccinated: true, neutered: true },
@@ -21,6 +23,11 @@ const shelters = [
   { _id: "4", name: "Wagging Tails Rescue", location: "Whitefield, Bangalore", address: "22 Brookfield Road, Whitefield, Bangalore", phone: "+91 98765 43213", email: "contact@waggingtails.org", description: "Community-driven rescue focused on vaccinating, neutering, and rehoming stray dogs.", dogsCount: 15, rating: 4.5, image: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400" },
 ];
 
+const users = [
+  { name: "Admin User", email: "admin@furrysouls.com", password: "admin123", role: "admin" },
+  { name: "Regular User", email: "user@furrysouls.com", password: "user123", role: "user" },
+];
+
 const seedDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -29,17 +36,29 @@ const seedDB = async () => {
     
     await Pet.deleteMany({});
     await Shelter.deleteMany({});
-    console.log('Deleted existing pets and shelters');
+    await User.deleteMany({});
+    console.log('Deleted existing pets, shelters, and users');
+    
+    // Hash passwords for users
+    const hashedUsers = await Promise.all(users.map(async (user) => {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(user.password, salt);
+      return { ...user, password: hashedPassword };
+    }));
     
     const insertedPets = await Pet.insertMany(pets);
     const insertedShelters = await Shelter.insertMany(shelters);
+    const insertedUsers = await User.insertMany(hashedUsers);
     console.log(`Inserted ${insertedPets.length} pets`);
     console.log(`Inserted ${insertedShelters.length} shelters`);
+    console.log(`Inserted ${insertedUsers.length} users`);
     
     const petCount = await Pet.countDocuments();
     const shelterCount = await Shelter.countDocuments();
+    const userCount = await User.countDocuments();
     console.log(`Total pets in database: ${petCount}`);
     console.log(`Total shelters in database: ${shelterCount}`);
+    console.log(`Total users in database: ${userCount}`);
     
     console.log('Data seeded successfully');
     process.exit();

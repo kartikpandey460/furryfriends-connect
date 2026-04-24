@@ -112,7 +112,7 @@ const AdoptionFormPage = () => {
       if (response.ok) {
         toast({
           title: "Application Submitted! 🎉",
-          description: `Your adoption request for ${dog?.name || "this dog"} has been sent to ${shelter?.name || "the shelter"}.`,
+          description: `Your adoption request for ${dog?.name || "this dog"} has been sent.`,
         });
         setTimeout(() => navigate("/adoption-requests"), 1500);
       } else {

@@ -29,7 +29,7 @@ const Footer = () => (
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
             <span>hello@furrysouls.org</span>
             <span>+91 80 1234 5678</span>
-            <span>Bangalore, India</span>
+            <span>New Delhi, India</span>
           </div>
         </div>
         <div>

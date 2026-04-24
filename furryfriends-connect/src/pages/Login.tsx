@@ -6,12 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, PawPrint } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { setUser } = useAuth();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -35,6 +37,7 @@ const LoginPage = () => {
 
       if (response.ok) {
         localStorage.setItem('user', JSON.stringify(data));
+        setUser(data);
         toast({
           title: "Login Successful! 🎉",
           description: `Welcome back, ${data.name}!`,
