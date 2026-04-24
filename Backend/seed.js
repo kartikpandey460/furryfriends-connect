@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const Pet = require('./Models/Pet');
 const Shelter = require('./Models/Shelter');
 const User = require('./Models/User');
+const Donation = require('./Models/Donation');
 
 const pets = [
   { name: "Bruno", breed: "Indian Pariah", age: "2 years", gender: "Male", size: "Medium", image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400", description: "A friendly and energetic boy who loves morning walks and belly rubs.", shelterId: "1", vaccinated: true, neutered: true },
@@ -28,6 +29,17 @@ const users = [
   { name: "Regular User", email: "user@furrysouls.com", password: "user123", role: "user" },
 ];
 
+const donations = [
+  { name: "Rahul Sharma", email: "rahul@example.com", amount: 5000, message: "Keep up the great work!", paymentMethod: "upi", status: "completed" },
+  { name: "Priya Patel", email: "priya@example.com", amount: 2500, message: "Happy to support animal welfare", paymentMethod: "card", status: "completed" },
+  { name: "Amit Kumar", email: "amit@example.com", amount: 10000, message: "For the dogs in need", paymentMethod: "netbanking", status: "completed" },
+  { name: "Sneha Reddy", email: "sneha@example.com", amount: 1500, paymentMethod: "wallet", status: "completed" },
+  { name: "Vikram Singh", email: "vikram@example.com", amount: 3000, message: "Supporting local shelters", paymentMethod: "card", status: "pending" },
+  { name: "Kavita Joshi", email: "kavita@example.com", amount: 7500, message: "Love what you do!", paymentMethod: "upi", status: "completed" },
+  { name: "Rajesh Gupta", email: "rajesh@example.com", amount: 2000, paymentMethod: "netbanking", status: "failed" },
+  { name: "Meera Iyer", email: "meera@example.com", amount: 4500, message: "For a better world for animals", paymentMethod: "card", status: "completed" },
+];
+
 const seedDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -37,7 +49,8 @@ const seedDB = async () => {
     await Pet.deleteMany({});
     await Shelter.deleteMany({});
     await User.deleteMany({});
-    console.log('Deleted existing pets, shelters, and users');
+    await Donation.deleteMany({});
+    console.log('Deleted existing pets, shelters, users, and donations');
     
     // Hash passwords for users
     const hashedUsers = await Promise.all(users.map(async (user) => {
@@ -49,16 +62,20 @@ const seedDB = async () => {
     const insertedPets = await Pet.insertMany(pets);
     const insertedShelters = await Shelter.insertMany(shelters);
     const insertedUsers = await User.insertMany(hashedUsers);
+    const insertedDonations = await Donation.insertMany(donations);
     console.log(`Inserted ${insertedPets.length} pets`);
     console.log(`Inserted ${insertedShelters.length} shelters`);
     console.log(`Inserted ${insertedUsers.length} users`);
+    console.log(`Inserted ${insertedDonations.length} donations`);
     
     const petCount = await Pet.countDocuments();
     const shelterCount = await Shelter.countDocuments();
     const userCount = await User.countDocuments();
+    const donationCount = await Donation.countDocuments();
     console.log(`Total pets in database: ${petCount}`);
     console.log(`Total shelters in database: ${shelterCount}`);
     console.log(`Total users in database: ${userCount}`);
+    console.log(`Total donations in database: ${donationCount}`);
     
     console.log('Data seeded successfully');
     process.exit();

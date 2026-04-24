@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Donation = require('../Models/Donation');
+const { protect, admin } = require('../Middleware/authMiddleware');
 
 // GET all donations (admin only)
-router.get('/', async (req, res) => {
+router.get('/', protect, admin, async (req, res) => {
   try {
     const donations = await Donation.find().sort({ createdAt: -1 });
     res.json(donations);

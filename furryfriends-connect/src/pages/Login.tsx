@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { setUser } = useAuth();
   const [form, setForm] = useState({
@@ -42,7 +43,8 @@ const LoginPage = () => {
           title: "Login Successful! 🎉",
           description: `Welcome back, ${data.name}!`,
         });
-        navigate("/");
+        const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
+        navigate(from, { replace: true });
       } else {
         toast({
           title: "Login Failed",

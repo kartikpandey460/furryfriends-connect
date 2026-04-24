@@ -19,9 +19,10 @@ const Navbar = () => {
   const adminLinks = [
     { to: "/admin", label: "Admin Dashboard" },
     { to: "/adoption-requests", label: "Adoption Requests" },
+    { to: "/admin/donations", label: "Donations" },
   ];
 
-  const links = user && user.role === 'admin' ? [...baseLinks, ...adminLinks] : baseLinks;
+  const links = user && user.role === 'admin' ? adminLinks : baseLinks;
 
   const isActive = (path: string) => location.pathname === path;
 
